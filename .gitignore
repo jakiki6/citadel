@@ -1,0 +1,5 @@
+obj_dir/*
+*.bin
+*.hex
+*.elf
+*.o
