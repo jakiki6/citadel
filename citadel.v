@@ -95,8 +95,8 @@ always @ (posedge clk) begin
         mem_ready[0] <= 1;
     end else begin
         mem_ready[0] <= 0;
-        rx_ack[0] <= 0;
-        tx_ready[0] <= 0;
+        rx_ack[0]    <= 0;
+        tx_ready[0]  <= 0;
     end
 end
 

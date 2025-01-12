@@ -4,6 +4,7 @@ reset:
     j .
     j .
     j .
+    j .
 
 _start:
     call main
