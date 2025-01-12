@@ -5,19 +5,16 @@ module citadel #(
     SRAM_SIZE = 65536
 ) (
     // System clock + reset
-    input wire               r_clk,
-    input wire               rst_n,
+    input                    r_clk,
+    input                    rst_n,
 
     // IO
-    output reg  [7:0]        tx,
-    input  wire [7:0]        rx,
-    output reg  [0:0]        tx_ready,
-    input  wire [0:0]        rx_ready,
-    output reg  [0:0]        rx_ack,
+    input                    rx,
+    output                   tx,
 
     // misc
-    output reg  [0:0]        panic,
-    input  wire [0:0]        recovery
+    output                   r_panic,
+    input                    recovery
 );
 
 reg  [ 7: 0] mem [SRAM_SIZE];
@@ -26,17 +23,43 @@ initial begin
     `include "bootrom/bootrom.v"
 end
 
-initial panic[0] <= 0;
+reg panic;
+assign r_panic = panic;
+
+always @ (posedge r_clk) begin
+    if (!rst_n) panic <= 0;
+end
+
 wire clk;
 assign clk = r_clk && !panic;
 
-reg [ 0: 0] mem_valid;
-reg [ 0: 0] mem_ready;
+reg mem_valid;
+reg mem_ready;
 
 reg [31: 0] mem_addr;
 reg [31: 0] mem_wdata;
 reg [ 3: 0] mem_wstrb;
 reg [31: 0] mem_rdata;
+
+reg uart0_we;
+reg uart0_re;
+reg [31:0] uart0_di;
+wire [31:0] uart0_do;
+wire uart0_wait;
+
+uart uart0 (
+    .clk (clk),
+    .rst_n (rst_n),
+
+    .tx (tx),
+    .rx (rx),
+
+    .we (uart0_we),
+    .re (uart0_re),
+    .si (uart0_di),
+    .so (uart0_do),
+    .wa (uart0_wait)
+);
 
 picorv32 #(
     .BARREL_SHIFTER (1),
@@ -74,23 +97,22 @@ always @ (posedge clk) begin
                 if (mem_wstrb[2]) mem[mem_addr[23:0] + 2] <= mem_wdata[23:16];
                 if (mem_wstrb[3]) mem[mem_addr[23:0] + 3] <= mem_wdata[31:24];
             end
-        end else if (mem_addr == 32'h01000000 && mem_wstrb && mem_wdata[7:0] == 8'h42) begin
-            panic[0] <= 1;
+        end else if (mem_addr == 32'h01000000) begin
+            if (mem_wstrb != 4'b0) begin
+                panic <= 1;
+            end else if (mem_wstrb[3:0] == 4'b0) begin
+                mem_rdata[31:0] <= 0;
+                mem_rdata[0] <= recovery;
+                mem_rdata[1] <= uart0_do != ~0;
+                mem_rdata[2] <= uart0_wait;
+            end
         end else if (mem_addr == 32'h01000004) begin
             if (mem_wstrb == 4'b0000) begin
-                if (rx_ready) begin
-                    mem_rdata[31:0] <= rx;
-                    rx_ack[0] <= 1;
-                end
-            end else begin
-                tx[7:0] <= mem_wdata[7:0];
-                tx_ready[0] <= 1;
-            end
-        end else if (mem_addr == 32'h01000008) begin
-            if (mem_wstrb == 4'b0000) begin
-                mem_rdata[31:0] <= 0;
-                mem_rdata[0] <= rx_ready;
-                mem_rdata[1] <= recovery;
+                mem_rdata <= uart0_do;
+                uart0_re <= 1;
+            end else if (!uart0_wait) begin
+                uart0_di <= mem_wdata;
+                uart0_we <= 1;
             end
         end else begin
             if (!(mem_wstrb == 4'b0000)) begin
@@ -98,11 +120,11 @@ always @ (posedge clk) begin
             end
         end
 
-        mem_ready[0] <= 1;
+        mem_ready <= 1;
     end else begin
-        mem_ready[0] <= 0;
-        rx_ack[0]    <= 0;
-        tx_ready[0]  <= 0;
+        mem_ready <= 0;
+        uart0_re <= 0;
+        uart0_we <= 0;
     end
 end
 

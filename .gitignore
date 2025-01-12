@@ -2,3 +2,4 @@ obj_dir/*
 *.bin
 *.elf
 *.o
+*.vcd

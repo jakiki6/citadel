@@ -7,8 +7,11 @@ reset:
     j .
 
 _start:
-
+    li t0, 0x100
 .delay:
+    addi t0, t0, -1
+    bnez t0, .delay
+
     call main
 
     li t0, 0x42
