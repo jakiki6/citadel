@@ -19,15 +19,7 @@ module citadel #(
 reg  [ 7: 0] mem [SRAM_SIZE];
 
 initial begin
-    integer n;
-    for (n = 0; n < SRAM_SIZE; n = n + 4) begin
-        mem[n + 0] = 8'h00;
-        mem[n + 1] = 8'h00;
-        mem[n + 2] = 8'h00;
-        mem[n + 3] = 8'h13;
-    end
-
-    $readmemh("bootrom/rom.hex", mem);
+    `include "bootrom/bootrom.v"
 end
 
 initial panic[0] <= 0;

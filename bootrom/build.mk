@@ -1,10 +1,10 @@
-bootrom/rom.hex: bootrom/rom.bin
-	xxd -c 1 -plain $< > $@
+bootrom/bootrom.v: bootrom/bootrom.bin
+	python3 bootrom/conv.py
 
-bootrom/rom.bin: bootrom/rom.elf
+bootrom/bootrom.bin: bootrom/bootrom.elf
 	riscv32-none-elf-objcopy --output-target=binary $< $@
 
-bootrom/rom.elf: bootrom/start.o bootrom/main.o
+bootrom/bootrom.elf: bootrom/start.o bootrom/main.o
 	riscv32-none-elf-ld -nostdlib -o $@ $^ -Tbootrom/layout.ld
 
 %.o: %.c
@@ -14,6 +14,6 @@ bootrom/rom.elf: bootrom/start.o bootrom/main.o
 	riscv32-none-elf-as -o $@ $<
 
 bootrom_clean:
-	rm -f bootrom/rom.hex bootrom/rom.bin bootrom/*.elf bootrom/*.o
+	rm -f bootrom/bootrom.v bootrom/bootrom.bin bootrom/*.elf bootrom/*.o
 
 .PHONY: bootrom_clean
