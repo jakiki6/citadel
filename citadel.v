@@ -2,7 +2,7 @@ module citadel #(
     SRAM_SIZE = 65536
 ) (
     // System clock + reset
-    input wire               clk,
+    input wire               r_clk,
     input wire               rst_n,
 
     // IO
@@ -10,9 +10,10 @@ module citadel #(
     input  wire [7:0]        rx,
     output wire [0:0]        tx_ready,
     input  wire [0:0]        rx_ready,
+    output wire [0:0]        rx_ack,
 
     // power
-    output wire [0:0]        exit
+    output wire [0:0]        panic
 );
 
 reg  [ 7: 0] mem [SRAM_SIZE];
@@ -29,7 +30,9 @@ initial begin
     $readmemh("bootrom/rom.hex", mem);
 end
 
-initial exit[0] <= 0;
+initial panic[0] <= 0;
+wire clk;
+assign clk = r_clk && !panic;
 
 wire [ 0: 0] mem_valid;
 wire [ 0: 0] mem_ready;
@@ -76,11 +79,12 @@ always @ (posedge clk) begin
                 if (mem_wstrb[3]) mem[mem_addr[23:0] + 3] <= mem_wdata[31:24];
             end
         end else if (mem_addr == 32'h01000000 && mem_wstrb && mem_wdata[7:0] == 8'h42) begin
-            exit[0] <= 1;
+            panic[0] <= 1;
         end else if (mem_addr == 32'h01000004) begin
             if (mem_wstrb == 4'b0000) begin
                 if (rx_ready) begin
                     mem_rdata[31:0] <= rx;
+                    rx_ack[0] <= 1;
                 end
             end else begin
                 tx[7:0] <= mem_wdata[7:0];
@@ -99,6 +103,7 @@ always @ (posedge clk) begin
         mem_ready[0] <= 1;
     end else begin
         mem_ready[0] <= 0;
+        rx_ack[0] <= 0;
         tx_ready[0] <= 0;
     end
 end
