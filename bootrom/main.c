@@ -13,6 +13,11 @@ void main(void) {
         recovery();
     }
 
-    while ((*mcu_status) & 4);
-    *uart = 'A';
+    char *msg = "Hello world from UART!\n";
+
+    while (*msg) {
+        while ((*mcu_status) & 4);
+        *uart = *msg;
+        msg++;
+    }
 }
