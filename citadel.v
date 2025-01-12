@@ -12,8 +12,9 @@ module citadel #(
     input  wire [0:0]        rx_ready,
     output reg  [0:0]        rx_ack,
 
-    // power
-    output reg  [0:0]        panic
+    // misc
+    output reg  [0:0]        panic,
+    input  wire [0:0]        recovery
 );
 
 reg  [ 7: 0] mem [SRAM_SIZE];
@@ -84,7 +85,9 @@ always @ (posedge clk) begin
             end
         end else if (mem_addr == 32'h01000008) begin
             if (mem_wstrb == 4'b0000) begin
-                mem_rdata[31:0] <= rx_ready;
+                mem_rdata[31:0] <= 0;
+                mem_rdata[0] <= rx_ready;
+                mem_rdata[1] <= recovery;
             end
         end else begin
             if (!(mem_wstrb == 4'b0000)) begin

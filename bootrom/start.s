@@ -7,6 +7,8 @@ reset:
     j .
 
 _start:
+
+.delay:
     call main
 
     li t0, 0x42
