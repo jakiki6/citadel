@@ -43,8 +43,8 @@ reg [31: 0] mem_rdata;
 
 reg uart0_we;
 reg uart0_re;
-reg [31:0] uart0_di;
-wire [31:0] uart0_do;
+wire [31:0] uart0_di;
+reg [31:0] uart0_do;
 wire uart0_wait;
 
 uart uart0 (
@@ -108,10 +108,10 @@ always @ (posedge clk) begin
             end
         end else if (mem_addr == 32'h01000004) begin
             if (mem_wstrb == 4'b0000) begin
-                mem_rdata <= uart0_do;
+                mem_rdata <= uart0_di;
                 uart0_re <= 1;
             end else if (!uart0_wait) begin
-                uart0_di <= mem_wdata;
+                uart0_do <= mem_wdata;
                 uart0_we <= 1;
             end
         end else begin

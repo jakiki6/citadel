@@ -13,8 +13,6 @@ void main(void) {
         recovery();
     }
 
-    while (1) {
-        while ((*mcu_status) & 4);
-        *uart = 0x80;
-    }
+    while ((*mcu_status) & 4);
+    *uart = 'A';
 }
