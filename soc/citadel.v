@@ -1,3 +1,6 @@
+`include "soc/picorv32.v"
+`include "soc/uart.v"
+
 module citadel #(
     SRAM_SIZE = 65536
 ) (
