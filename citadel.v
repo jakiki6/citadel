@@ -6,14 +6,14 @@ module citadel #(
     input wire               rst_n,
 
     // IO
-    output wire [7:0]        tx,
+    output reg  [7:0]        tx,
     input  wire [7:0]        rx,
-    output wire [0:0]        tx_ready,
+    output reg  [0:0]        tx_ready,
     input  wire [0:0]        rx_ready,
-    output wire [0:0]        rx_ack,
+    output reg  [0:0]        rx_ack,
 
     // power
-    output wire [0:0]        panic
+    output reg  [0:0]        panic
 );
 
 reg  [ 7: 0] mem [SRAM_SIZE];
@@ -26,13 +26,13 @@ initial panic[0] <= 0;
 wire clk;
 assign clk = r_clk && !panic;
 
-wire [ 0: 0] mem_valid;
-wire [ 0: 0] mem_ready;
+reg [ 0: 0] mem_valid;
+reg [ 0: 0] mem_ready;
 
-wire [31: 0] mem_addr;
-wire [31: 0] mem_wdata;
-wire [ 3: 0] mem_wstrb;
-wire [31: 0] mem_rdata;
+reg [31: 0] mem_addr;
+reg [31: 0] mem_wdata;
+reg [ 3: 0] mem_wstrb;
+reg [31: 0] mem_rdata;
 
 picorv32 #(
     .BARREL_SHIFTER (1),
