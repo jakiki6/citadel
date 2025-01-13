@@ -8,7 +8,7 @@ bootrom/bootrom.elf: bootrom/start.o bootrom/main.o
 	riscv32-none-elf-ld -nostdlib -o $@ $^ -Tbootrom/layout.ld
 
 %.o: %.c
-	riscv32-none-elf-gcc -c -O2 -Ishared/include -o $@ $<
+	riscv32-none-elf-gcc -c -O2 -nostdinc -Ishared/include -o $@ $<
 
 %.o: %.s
 	riscv32-none-elf-as -o $@ $<

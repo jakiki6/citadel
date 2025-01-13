@@ -30,6 +30,12 @@ int main(int argc, char **argv) {
     top->rst_n = 0;
     top->rx = 1;
 
+    for (int i = 1; i < argc; i++) {
+        if (strcmp(argv[i], "--recovery") == 0) {
+            top->recovery = 1;
+        }
+    }
+
     for (int i = 0; i < 200; i++) {
         top->r_clk = !top->r_clk;
         top->eval();
