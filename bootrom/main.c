@@ -1,4 +1,4 @@
-typedef unsigned int uint32_t;
+#include <stdint.h>
 
 static volatile uint32_t *uart = (void *) 0x01000004;
 static volatile uint32_t *mcu_status = (void *) 0x01000000;
@@ -21,5 +21,9 @@ void main(void) {
         msg++;
     }
 
-    while (!((*mcu_status) & 0x01));
+    while (1) {
+        while (!((*mcu_status) & 0x01));
+
+        *uart = *uart;
+    }
 }
