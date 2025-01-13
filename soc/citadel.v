@@ -102,9 +102,9 @@ always @ (posedge clk) begin
                 panic <= 1;
             end else if (mem_wstrb[3:0] == 4'b0) begin
                 mem_rdata[31:0] <= 0;
-                mem_rdata[0] <= recovery;
-                mem_rdata[1] <= uart0_do != ~0;
-                mem_rdata[2] <= uart0_wait;
+                mem_rdata[0] <= uart0_di != ~0;
+                mem_rdata[1] <= uart0_wait;
+                mem_rdata[2] <= recovery;
             end
         end else if (mem_addr == 32'h01000004) begin
             if (mem_wstrb == 4'b0000) begin

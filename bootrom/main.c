@@ -9,15 +9,17 @@ void recovery(void) {
 
 void main(void) {
     // recovery boot path
-    if ((*mcu_status) & 0x01) {
+    if ((*mcu_status) & 0x04) {
         recovery();
     }
 
     char *msg = "Hello world from UART!\n";
 
     while (*msg) {
-        while ((*mcu_status) & 4);
+        while ((*mcu_status) & 0x02);
         *uart = *msg;
         msg++;
     }
+
+    while (!((*mcu_status) & 0x01));
 }

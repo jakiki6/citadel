@@ -12,7 +12,7 @@ int main(int argc, char **argv) {
     uint8_t tx = 0;
     int irx = 0;
     int itx = 0;
-    int delay = 0;
+    int tx_delay = 100;
 
     VerilatedContext *contextp = new VerilatedContext;
     contextp->commandArgs(argc, argv);
@@ -40,6 +40,30 @@ int main(int argc, char **argv) {
     fcntl(fileno(stdin), F_SETFL, fcntl(fileno(stdin), F_GETFL) | O_NONBLOCK);
     while (!top->r_panic) {
         top->r_clk = !top->r_clk;
+
+
+        if (top->r_clk) {
+            if (itx) {
+                itx--;
+                top->rx = tx >> 7;
+                tx <<= 1;
+
+                if (itx == 0) {
+                    tx_delay = 32;
+                }
+            } else if (tx_delay) {
+                tx_delay--;
+                top->rx = 1;
+            } else {
+                int c = getc(stdin);
+                if (c >= 0) {
+                    itx = 8;
+                    tx = c;
+                    top->rx = 0;
+                }
+            }
+        }
+
         top->eval();
 
 #if TRACE

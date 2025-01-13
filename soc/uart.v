@@ -53,6 +53,10 @@ always @ (posedge clk) begin
 
             recv_buf <= recv_buf << 1;
             recv_buf[0] <= rx;
+
+            if (recv_ctr == 1) begin
+                recv_buf_valid <= 1;
+            end
         end else if (rx == 0) begin
             recv_ctr <= 8;
         end
