@@ -125,6 +125,7 @@ always @ (posedge clk) begin
                 mem_rdata[0] <= uart0_di != ~0;
                 mem_rdata[1] <= uart0_wait;
                 mem_rdata[2] <= recovery;
+                mem_rdata[3] <= rng;
             end
         end else if (mem_addr == 32'h01000004) begin
             if (mem_wstrb == 4'b0000) begin

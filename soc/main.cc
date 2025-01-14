@@ -14,6 +14,8 @@ int main(int argc, char **argv) {
     int itx = 0;
     int tx_delay = 100;
 
+    srand48(time(NULL));
+
     VerilatedContext *contextp = new VerilatedContext;
     contextp->commandArgs(argc, argv);
 
@@ -47,8 +49,9 @@ int main(int argc, char **argv) {
     while (!top->r_panic) {
         top->r_clk = !top->r_clk;
 
-
         if (top->r_clk) {
+            top->rng = lrand48() & 1;
+
             if (itx) {
                 itx--;
                 top->rx = tx >> 7;
