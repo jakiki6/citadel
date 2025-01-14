@@ -1,5 +1,6 @@
 `include "soc/picorv32.v"
 `include "soc/uart.v"
+`include "soc/spi.v"
 
 module citadel #(
     SRAM_SIZE = 65536
@@ -11,10 +12,13 @@ module citadel #(
     // IO
     input                    rx,
     output                   tx,
+    input                    miso,
+    output                   mosi,
 
     // misc
     output                   r_panic,
-    input                    recovery
+    input                    recovery,
+    input                    rng
 );
 
 reg  [ 7: 0] mem [SRAM_SIZE];
@@ -59,6 +63,22 @@ uart uart0 (
     .si (uart0_di),
     .so (uart0_do),
     .wa (uart0_wait)
+);
+
+reg [31:0] spi0_out;
+reg [31:0] spi0_in;
+reg spi0_ex;
+
+spi spi0 (
+    .clk (clk),
+    .rst_n (rst_n),
+
+    .mosi (mosi),
+    .miso (miso),
+
+    .si (spi0_in),
+    .so (spi0_out),
+    .ex (spi0_ex)
 );
 
 picorv32 #(
