@@ -1,7 +1,8 @@
 #include <stdint.h>
 
-static volatile uint32_t *uart = (void *) 0x01000004;
 static volatile uint32_t *mcu_status = (void *) 0x01000000;
+static volatile uint32_t *uart = (void *) 0x01000004;
+static volatile uint32_t *spi = (void *) 0x01000008;
 
 void panic(void) {
     *mcu_status = 0;
@@ -39,4 +40,10 @@ void main(void) {
     if ((*mcu_status) & 0x04) {
         recovery();
     }
+
+    while ((*mcu_status) & 0x20);
+    *spi = 0x69;
+    while ((*mcu_status) & 0x20);
+
+    *spi;
 }

@@ -14,6 +14,7 @@ module citadel #(
     output                   tx,
     input                    miso,
     output                   mosi,
+    output                   cs,
 
     // misc
     output                   r_panic,
@@ -65,9 +66,11 @@ uart uart0 (
     .wa (uart0_wait)
 );
 
-reg [31:0] spi0_out;
-reg [31:0] spi0_in;
+reg [31:0] spi0_do;
+reg [31:0] spi0_di;
 reg spi0_ex;
+reg spi0_ack;
+reg spi0_wait;
 
 spi spi0 (
     .clk (clk),
@@ -75,10 +78,13 @@ spi spi0 (
 
     .mosi (mosi),
     .miso (miso),
+    .cs (cs),
 
-    .si (spi0_in),
-    .so (spi0_out),
-    .ex (spi0_ex)
+    .si (spi0_di),
+    .so (spi0_do),
+    .ex (spi0_ex),
+    .ack (spi0_ack),
+    .wa (spi0_wait)
 );
 
 picorv32 #(
@@ -126,6 +132,8 @@ always @ (posedge clk) begin
                 mem_rdata[1] <= uart0_wait;
                 mem_rdata[2] <= recovery;
                 mem_rdata[3] <= rng;
+                mem_rdata[4] <= spi0_di != ~0;
+                mem_rdata[5] <= spi0_wait;
             end
         end else if (mem_addr == 32'h01000004) begin
             if (mem_wstrb == 4'b0000) begin
@@ -134,6 +142,14 @@ always @ (posedge clk) begin
             end else if (!uart0_wait) begin
                 uart0_do <= mem_wdata;
                 uart0_we <= 1;
+            end
+        end else if (mem_addr == 32'h01000008) begin
+            if (mem_wstrb == 4'b0000) begin
+                mem_rdata <= spi0_di;
+                spi0_ack <= 1;
+            end else if (!spi0_wait) begin
+                spi0_do <= mem_wdata;
+                spi0_ex <= 1;
             end
         end else begin
             if (!(mem_wstrb == 4'b0000)) begin
@@ -146,6 +162,8 @@ always @ (posedge clk) begin
         mem_ready <= 0;
         uart0_re <= 0;
         uart0_we <= 0;
+        spi0_ack <= 0;
+        spi0_ex <= 0;
     end
 end
 
