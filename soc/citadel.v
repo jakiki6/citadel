@@ -152,9 +152,7 @@ always @ (posedge clk) begin
                 spi0_ex <= 1;
             end
         end else begin
-            if (!(mem_wstrb == 4'b0000)) begin
-                mem_rdata[31: 0] <= 32'b0;
-            end
+            panic <= 1;
         end
 
         mem_ready <= 1;
