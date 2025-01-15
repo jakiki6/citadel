@@ -26,6 +26,17 @@ uint8_t spix(uint8_t c) {
     return *spi;
 }
 
+uint8_t rng() {
+    uint8_t r = 0;
+
+    for (int i = 0; i < 8; i++) {
+        r <<= 1;
+        r |= ((*mcu_status) & 0x08) ? 1 : 0;
+    }
+
+    return r;
+}
+
 void do_recovery(void) {
     putc('C');
     putc('I');
