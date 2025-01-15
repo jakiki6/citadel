@@ -19,6 +19,13 @@ uint8_t getc(void) {
     return *uart;
 }
 
+uint8_t spix(uint8_t c) {
+    while ((*mcu_status) & 0x20);
+    *spi = c;
+    while ((*mcu_status) & 0x20);
+    return *spi;
+}
+
 void do_recovery(void) {
     putc('C');
     putc('I');
@@ -40,10 +47,4 @@ void main(void) {
     if ((*mcu_status) & 0x04) {
         recovery();
     }
-
-    while ((*mcu_status) & 0x20);
-    *spi = 0x69;
-    while ((*mcu_status) & 0x20);
-
-    *spi;
 }

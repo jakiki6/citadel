@@ -6,6 +6,10 @@
 #include "verilated.h"
 #include "verilated_vcd_c.h"
 
+uint8_t spi_process(uint8_t in) {
+    return 0x00;
+}
+
 int main(int argc, char **argv) {
     vluint64_t simtime = 0;
     uint8_t rx = 0;
@@ -13,6 +17,9 @@ int main(int argc, char **argv) {
     int irx = 0;
     int itx = 0;
     int tx_delay = 100;
+    uint8_t mosi = 0;
+    uint8_t miso = 0;
+    int old_cs = 1;
 
     srand48(time(NULL));
 
@@ -49,6 +56,14 @@ int main(int argc, char **argv) {
     while (!top->r_panic) {
         top->r_clk = !top->r_clk;
 
+        if (top->cs != old_cs) {
+            if (top->cs) {
+                miso = spi_process(mosi);
+            }
+        }
+
+        old_cs = top->cs;
+
         if (top->r_clk) {
             top->rng = lrand48() & 1;
 
@@ -71,6 +86,11 @@ int main(int argc, char **argv) {
                     top->rx = 0;
                 }
             }
+        } else {
+            if (!top->cs) {
+                top->miso = miso >> 7;
+                miso <<= 1;
+            }
         }
 
         top->eval();
@@ -92,6 +112,11 @@ int main(int argc, char **argv) {
                 }
             } else if (top->tx == 0) {
                 irx = 8;
+            }
+
+            if (!top->cs) {
+                mosi <<= 1;
+                mosi |= top->mosi & 1;
             }
         }
     }
