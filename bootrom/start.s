@@ -1,11 +1,4 @@
 .section .start
-reset:
-    j _start
-    j .
-    j .
-    j .
-    j .
-
 _start:
     call main
 

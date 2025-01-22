@@ -87,18 +87,17 @@ module citadel #(
             .wa (spi0_wait)
         );
 
+    wire core_panic;
+    always @ (posedge core_panic) begin
+        panic <= 1;
+    end
+
     picorv32 #(
-                 .BARREL_SHIFTER (1),
-                 .TWO_CYCLE_COMPARE (1),
-                 .TWO_CYCLE_ALU (1),
-                 .COMPRESSED_ISA (1),
-                 .ENABLE_MUL (1),
-                 .ENABLE_FAST_MUL (1),
-                 .ENABLE_DIV (1),
                  .STACKADDR (SRAM_SIZE - 4)
              ) core (
                  .clk (clk),
                  .resetn (rst_n),
+                 .trap (core_panic),
 
                  .mem_valid (mem_valid),
                  .mem_ready (mem_ready),
