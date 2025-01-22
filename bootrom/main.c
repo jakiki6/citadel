@@ -53,9 +53,11 @@ void recovery(void) {
     panic();
 }
 
-void main(void) {
+void __attribute__((__section__(".start"))) main(void) {
     // recovery boot path
     if ((*mcu_status) & 0x04) {
         recovery();
     }
+
+    panic();
 }
