@@ -30,7 +30,7 @@ static inline uint8_t spix(uint8_t c) {
     return *spi;
 }
 
-void putcs(void *_buf, int count) {
+void putcs(void *_buf, unsigned int count) {
     uint8_t *buf = (uint8_t *) _buf;
     while (count--) {
         putc(*buf);
@@ -38,7 +38,7 @@ void putcs(void *_buf, int count) {
     }
 }
 
-void getcs(void *_buf, int count) {
+void getcs(void *_buf, unsigned int count) {
     uint8_t *buf = (uint8_t *) _buf;
     while (count--) {
         *buf = getc();
@@ -46,7 +46,7 @@ void getcs(void *_buf, int count) {
     }
 }
 
-void spixs(void *_buf, int count) {
+void spixs(void *_buf, unsigned int count) {
     uint8_t *buf = (uint8_t *) _buf;
     while (count--) {
         *buf = spix(*buf);
