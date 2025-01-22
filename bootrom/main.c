@@ -4,29 +4,57 @@ static volatile uint32_t *mcu_status = (void *) 0x01000000;
 static volatile uint32_t *uart = (void *) 0x01000004;
 static volatile uint32_t *spi = (void *) 0x01000008;
 
-void panic(void) {
+// CITADEL0 in little-endian
+static uint64_t boot_magic = 0x304c454441544943;
+
+static inline __attribute__((noreturn)) void panic(void) {
     *mcu_status = 0;
     for(;;);
 }
 
-void putc(uint8_t c) {
+static inline void putc(uint8_t c) {
     while ((*mcu_status) & 0x02);
     *uart = c;
+    while ((*mcu_status) & 0x02);
 }
 
-uint8_t getc(void) {
+static inline uint8_t getc(void) {
     while (!((*mcu_status) & 0x01));
     return *uart;
 }
 
-uint8_t spix(uint8_t c) {
+static inline uint8_t spix(uint8_t c) {
     while ((*mcu_status) & 0x20);
     *spi = c;
     while ((*mcu_status) & 0x20);
     return *spi;
 }
 
-uint8_t rng() {
+void putcs(void *_buf, int count) {
+    uint8_t *buf = (uint8_t *) _buf;
+    while (count--) {
+        putc(*buf);
+        buf++;
+    }
+}
+
+void getcs(void *_buf, int count) {
+    uint8_t *buf = (uint8_t *) _buf;
+    while (count--) {
+        *buf = getc();
+        buf++;
+    }
+}
+
+void spixs(void *_buf, int count) {
+    uint8_t *buf = (uint8_t *) _buf;
+    while (count--) {
+        *buf = spix(*buf);
+        buf++;
+    }
+}
+
+static inline uint8_t rng() {
     uint8_t r = 0;
 
     for (int i = 0; i < 8; i++) {
@@ -38,14 +66,7 @@ uint8_t rng() {
 }
 
 void do_recovery(void) {
-    putc('C');
-    putc('I');
-    putc('T');
-    putc('A');
-    putc('D');
-    putc('E');
-    putc('L');
-    putc('0');
+    putcs(&boot_magic, 8);
 }
 
 void recovery(void) {
