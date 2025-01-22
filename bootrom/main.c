@@ -9,7 +9,6 @@ static uint64_t boot_magic = 0x304c454441544943;
 
 static inline __attribute__((noreturn)) void panic(void) {
     *mcu_status = 0;
-    for(;;);
 }
 
 static inline void putc(uint8_t c) {
