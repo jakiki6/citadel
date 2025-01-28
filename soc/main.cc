@@ -28,6 +28,7 @@ int main(int argc, char **argv) {
     uint8_t mosi = 0;
     uint8_t miso = 0;
     int old_cs = 1;
+    int old_sclk = 1;
     int spi_ctr = 0;
 
     srand48(time(NULL));
@@ -73,6 +74,11 @@ int main(int argc, char **argv) {
             }
         }
 
+        if (!top->cs && top->sclk != old_sclk && !top->sclk) {
+            top->miso = miso >> 7;
+            miso <<= 1;
+        }
+
         old_cs = top->cs;
 
         if (top->r_clk) {
@@ -97,11 +103,6 @@ int main(int argc, char **argv) {
                     top->rx = 0;
                 }
             }
-        } else {
-            if (!top->cs) {
-                top->miso = miso >> 7;
-                miso <<= 1;
-            }
         }
 
         top->eval();
@@ -124,17 +125,15 @@ int main(int argc, char **argv) {
             } else if (top->tx == 0) {
                 irx = 8;
             }
+        }
 
-            if (!top->cs) {
-                mosi <<= 1;
-                mosi |= top->mosi & 1;
+        if (!top->cs && top->sclk != old_sclk && top->sclk) {
+            mosi <<= 1;
+            mosi |= top->mosi & 1;
 
-                spi_ctr++;
-                if (spi_ctr == 8) {
-                    spi_ctr = 0;
-
-                    miso = spi_process(mosi);
-                }
+            spi_ctr++;
+            if (spi_ctr == 8) {
+                miso = spi_process(mosi);
             }
         }
     }

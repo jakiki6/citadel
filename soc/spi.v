@@ -4,6 +4,7 @@ module spi (
 
         output mosi,
         input miso,
+        output sclk,
 
         input [31:0] clkdiv,
 
@@ -23,6 +24,7 @@ module spi (
 
     assign si = recv_buf_valid ? recv_buf : ~0;
     assign mosi = exchange_ctr > 0 ? send_buf[7] : 1;
+    assign sclk = (clk && (exchange_ctr != 0)) | (exchange_ctr == 0);
     assign wa = exchange_ctr > 0;
 
     always @ (negedge clk) begin

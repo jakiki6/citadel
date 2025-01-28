@@ -15,6 +15,7 @@ module citadel #(
         input                    miso,
         output                   mosi,
         output                   cs,
+        output                   sclk,
 
         // misc
         output                   r_panic,
@@ -80,6 +81,7 @@ module citadel #(
 
             .mosi (mosi),
             .miso (miso),
+            .sclk (sclk),
 
             .si (spi0_di),
             .so (spi0_do),
