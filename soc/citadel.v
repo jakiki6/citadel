@@ -71,6 +71,8 @@ module citadel #(
     reg spi0_ex;
     reg spi0_ack;
     reg spi0_wait;
+    reg spi0_cs;
+    assign cs = spi0_cs;
 
     spi spi0 (
             .clk (clk),
@@ -78,7 +80,6 @@ module citadel #(
 
             .mosi (mosi),
             .miso (miso),
-            .cs (cs),
 
             .si (spi0_di),
             .so (spi0_do),
@@ -149,6 +150,10 @@ module citadel #(
                 end else if (!spi0_wait) begin
                     spi0_do <= mem_wdata;
                     spi0_ex <= 1;
+                end
+            end else if (mem_addr == 32'h0100000c) begin
+                if (mem_wstrb != 4'b0000) begin
+                    spi0_cs <= mem_wdata[0];
                 end
             end else begin
                 panic <= 1;

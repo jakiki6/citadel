@@ -6,6 +6,14 @@
 #include "verilated.h"
 #include "verilated_vcd_c.h"
 
+void spi_start() {
+
+}
+
+void spi_end() {
+
+}
+
 uint8_t spi_process(uint8_t in) {
     return 0x00;
 }
@@ -20,6 +28,7 @@ int main(int argc, char **argv) {
     uint8_t mosi = 0;
     uint8_t miso = 0;
     int old_cs = 1;
+    int spi_ctr = 0;
 
     srand48(time(NULL));
 
@@ -58,7 +67,9 @@ int main(int argc, char **argv) {
 
         if (top->cs != old_cs) {
             if (top->cs) {
-                miso = spi_process(mosi);
+                spi_end();
+            } else {
+                spi_start();
             }
         }
 
@@ -117,6 +128,13 @@ int main(int argc, char **argv) {
             if (!top->cs) {
                 mosi <<= 1;
                 mosi |= top->mosi & 1;
+
+                spi_ctr++;
+                if (spi_ctr == 8) {
+                    spi_ctr = 0;
+
+                    miso = spi_process(mosi);
+                }
             }
         }
     }
