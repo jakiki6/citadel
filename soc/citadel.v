@@ -1,6 +1,5 @@
 `include "soc/picorv32.v"
 `include "soc/uart.v"
-`include "soc/spi.v"
 
 module citadel #(
         SRAM_SIZE = 65536
@@ -12,10 +11,6 @@ module citadel #(
         // IO
         input                    rx,
         output                   tx,
-        input                    miso,
-        output                   mosi,
-        output                   cs,
-        output                   sclk,
 
         // misc
         output                   r_panic,
@@ -67,29 +62,6 @@ module citadel #(
              .wa (uart0_wait)
          );
 
-    reg [31:0] spi0_do;
-    reg [31:0] spi0_di;
-    reg spi0_ex;
-    reg spi0_ack;
-    reg spi0_wait;
-    reg spi0_cs;
-    assign cs = spi0_cs;
-
-    spi spi0 (
-            .clk (clk),
-            .rst_n (rst_n),
-
-            .mosi (mosi),
-            .miso (miso),
-            .sclk (sclk),
-
-            .si (spi0_di),
-            .so (spi0_do),
-            .ex (spi0_ex),
-            .ack (spi0_ack),
-            .wa (spi0_wait)
-        );
-
     wire core_panic;
     always @ (posedge core_panic) begin
         panic <= 1;
@@ -134,8 +106,6 @@ module citadel #(
                     mem_rdata[1] <= uart0_wait;
                     mem_rdata[2] <= recovery;
                     mem_rdata[3] <= rng;
-                    mem_rdata[4] <= spi0_di != ~0;
-                    mem_rdata[5] <= spi0_wait;
                 end
             end else if (mem_addr == 32'h01000004) begin
                 if (mem_wstrb == 4'b0000) begin
@@ -144,18 +114,6 @@ module citadel #(
                 end else if (!uart0_wait) begin
                     uart0_do <= mem_wdata;
                     uart0_we <= 1;
-                end
-            end else if (mem_addr == 32'h01000008) begin
-                if (mem_wstrb == 4'b0000) begin
-                    mem_rdata <= spi0_di;
-                    spi0_ack <= 1;
-                end else if (!spi0_wait) begin
-                    spi0_do <= mem_wdata;
-                    spi0_ex <= 1;
-                end
-            end else if (mem_addr == 32'h0100000c) begin
-                if (mem_wstrb != 4'b0000) begin
-                    spi0_cs <= mem_wdata[0];
                 end
             end else begin
                 panic <= 1;
@@ -166,8 +124,6 @@ module citadel #(
             mem_ready <= 0;
             uart0_re <= 0;
             uart0_we <= 0;
-            spi0_ack <= 0;
-            spi0_ex <= 0;
         end
     end
 

@@ -2,7 +2,6 @@
 
 static volatile uint32_t *mcu_status = (void *) 0x01000000;
 static volatile uint32_t *uart = (void *) 0x01000004;
-static volatile uint32_t *spi = (void *) 0x01000008;
 
 // CITADEL0 in little-endian
 static uint64_t boot_magic = 0x304c454441544943;
@@ -22,13 +21,6 @@ static inline uint8_t getc(void) {
     return *uart;
 }
 
-static inline uint8_t spix(uint8_t c) {
-    while ((*mcu_status) & 0x20);
-    *spi = c;
-    while ((*mcu_status) & 0x20);
-    return *spi;
-}
-
 void putcs(void *_buf, unsigned int count) {
     uint8_t *buf = (uint8_t *) _buf;
     while (count--) {
@@ -41,14 +33,6 @@ void getcs(void *_buf, unsigned int count) {
     uint8_t *buf = (uint8_t *) _buf;
     while (count--) {
         *buf = getc();
-        buf++;
-    }
-}
-
-void spixs(void *_buf, unsigned int count) {
-    uint8_t *buf = (uint8_t *) _buf;
-    while (count--) {
-        *buf = spix(*buf);
         buf++;
     }
 }

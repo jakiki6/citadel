@@ -6,18 +6,6 @@
 #include "verilated.h"
 #include "verilated_vcd_c.h"
 
-void spi_start() {
-
-}
-
-void spi_end() {
-
-}
-
-uint8_t spi_process(uint8_t in) {
-    return 0x00;
-}
-
 int main(int argc, char **argv) {
     vluint64_t simtime = 0;
     uint8_t rx = 0;
@@ -25,11 +13,7 @@ int main(int argc, char **argv) {
     int irx = 0;
     int itx = 0;
     int tx_delay = 100;
-    uint8_t mosi = 0;
-    uint8_t miso = 0;
-    int old_cs = 1;
     int old_sclk = 1;
-    int spi_ctr = 0;
 
     srand48(time(NULL));
 
@@ -65,21 +49,6 @@ int main(int argc, char **argv) {
     fcntl(fileno(stdin), F_SETFL, fcntl(fileno(stdin), F_GETFL) | O_NONBLOCK);
     while (!top->r_panic) {
         top->r_clk = !top->r_clk;
-
-        if (top->cs != old_cs) {
-            if (top->cs) {
-                spi_end();
-            } else {
-                spi_start();
-            }
-        }
-
-        if (!top->cs && top->sclk != old_sclk && !top->sclk) {
-            top->miso = miso >> 7;
-            miso <<= 1;
-        }
-
-        old_cs = top->cs;
 
         if (top->r_clk) {
             top->rng = lrand48() & 1;
@@ -124,16 +93,6 @@ int main(int argc, char **argv) {
                 }
             } else if (top->tx == 0) {
                 irx = 8;
-            }
-        }
-
-        if (!top->cs && top->sclk != old_sclk && top->sclk) {
-            mosi <<= 1;
-            mosi |= top->mosi & 1;
-
-            spi_ctr++;
-            if (spi_ctr == 8) {
-                miso = spi_process(mosi);
             }
         }
     }
