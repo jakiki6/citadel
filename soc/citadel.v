@@ -27,12 +27,12 @@ module citadel #(
     reg panic;
     assign r_panic = panic;
 
-    always @ (posedge r_clk) begin
+    always @ (posedge clk) begin
         if (!rst_n) panic <= 0;
     end
 
     wire clk;
-    assign clk = r_clk && !panic;
+    assign clk = r_clk && (!panic | rst_n);
 
     reg mem_valid;
     reg mem_ready;
@@ -63,8 +63,8 @@ module citadel #(
          );
 
     wire core_panic;
-    always @ (posedge core_panic) begin
-        panic <= 1;
+    always @ (posedge clk) begin
+        if (core_panic) panic <= 1;
     end
 
     picorv32 #(

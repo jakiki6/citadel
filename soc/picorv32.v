@@ -36,7 +36,6 @@ module picorv32 #(
         output reg trap,
 
         output reg        mem_valid,
-        output reg        mem_instr,
         input             mem_ready,
 
         output reg [31:0] mem_addr,
@@ -354,13 +353,11 @@ module picorv32 #(
                 0: begin
                     if (mem_do_prefetch || mem_do_rinst || mem_do_rdata) begin
                         mem_valid <= !mem_la_use_prefetched_high_word;
-                        mem_instr <= mem_do_prefetch || mem_do_rinst;
                         mem_wstrb <= 0;
                         mem_state <= 1;
                     end
                     if (mem_do_wdata) begin
                         mem_valid <= 1;
-                        mem_instr <= 0;
                         mem_state <= 2;
                     end
                 end
